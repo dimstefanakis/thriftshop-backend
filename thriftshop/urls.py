@@ -20,8 +20,8 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
-    path('auth/', include('dj_rest_auth.urls')),
-    path('auth/twitter/', views.TwitterLogin.as_view(), name='twitter_login'),
-    path('auth/registration/', include('dj_rest_auth.registration.urls')),
+    path('api/auth/', include('dj_rest_auth.urls')),
+    path('api/auth/twitter/', views.TwitterLogin.as_view(), name='twitter_login'),
+    path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
     path('', include('api.urls')),
 ]
