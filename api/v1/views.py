@@ -1,10 +1,30 @@
 import os
+import stripe
 import requests
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from requests_oauthlib import OAuth1Session
 from . import serializers
+
+stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+
+
+@api_view(['POST'])
+def create_checkout_session(request):
+    session = stripe.checkout.Session.create(
+        success_url='http://localhost:8000/success',
+        cancel_url='http://localhost:8000/canceled',
+        line_items=[
+            {
+                "price": "price_H5ggYwtDq4fbrJ",
+                "quantity": 2,
+            },
+        ],
+        mode="payment",
+    )
+
+    return Response({"url": session.url})
 
 
 @api_view(['GET'])
