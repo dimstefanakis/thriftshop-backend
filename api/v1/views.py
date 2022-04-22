@@ -1,13 +1,35 @@
 import os
 import stripe
 import requests
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import viewsets
 from requests_oauthlib import OAuth1Session
+from mvp.models import Mvp
 from . import serializers
 
 stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+
+
+class MVPViewSet(viewsets.ModelViewSet):
+    queryset = Mvp.objects.all()
+    serializer_class = serializers.MvpSerializer
+
+    def retrieve(self, request, pk=None):
+        queryset = Mvp.objects.filter(user=request.user)
+        mvp = get_object_or_404(queryset, pk=pk)
+        serializer = serializers.MvpSerializer(mvp)
+        return Response(serializer.data)
+
+    def list(self, request):
+        if request.user.is_staff:
+            queryset = Mvp.objects.all()
+        else:
+            queryset = request.user.mvps.all()
+        serializer = serializers.MvpSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 @api_view(['POST'])

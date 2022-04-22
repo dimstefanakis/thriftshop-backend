@@ -1,13 +1,57 @@
 from rest_framework import serializers
-from mvp.models import Mvp
+from mvp.models import Mvp, CloudType, Platform, Industry, TechStack, Service, Hosting
 from accounts.models import UserProfile
 
 
+class CloudTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CloudType
+        fields = ['name']
+
+
+class PlatformSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Platform
+        fields = ['name']
+
+
+class IndustrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Industry
+        fields = ['name']
+
+
+class TechStackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TechStack
+        fields = ['name']
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ['name']
+
+
+class HostingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hosting
+        fields = ['name']
+
+
 class MvpSerializer(serializers.ModelSerializer):
+    cloud_types = CloudTypeSerializer(many=True)
+    platforms = PlatformSerializer(many=True)
+    industries = IndustrySerializer(many=True)
+    tech_stack = TechStackSerializer(many=True)
+    services = ServiceSerializer(many=True)
+    hosting = HostingSerializer(many=True)
+
     class Meta:
         model = Mvp
-        fields = ('id', 'name', 'one_liner', 'description',
-                  'github_project_url', 'created_at', 'updated_at')
+        fields = ('id', 'name', 'one_liner', 'description', 'validation', 'total_users', 'active_users',
+                'github_project_url', 'website_url', 'credit', 'cloud_types', 'platforms', 'industries', 'tech_stack',
+                'services', 'hosting', 'created_at', 'updated_at')
         read_only_fields = ('created_at', 'updated_at', 'id')
 
 
