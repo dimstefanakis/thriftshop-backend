@@ -16,6 +16,7 @@ stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 class MVPViewSet(viewsets.ModelViewSet):
     queryset = Mvp.objects.all()
     serializer_class = serializers.MvpSerializer
+    permission_classes = (AllowAny,)
 
     def retrieve(self, request, pk=None):
         queryset = Mvp.objects.filter(user=request.user)
@@ -24,10 +25,7 @@ class MVPViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def list(self, request):
-        if request.user.is_staff:
-            queryset = Mvp.objects.all()
-        else:
-            queryset = request.user.mvps.all()
+        queryset = Mvp.objects.all()
         serializer = serializers.MvpSerializer(queryset, many=True)
         return Response(serializer.data)
 

@@ -6,37 +6,37 @@ from accounts.models import UserProfile
 class CloudTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = CloudType
-        fields = ['name']
+        fields = ['name', 'id']
 
 
 class PlatformSerializer(serializers.ModelSerializer):
     class Meta:
         model = Platform
-        fields = ['name']
+        fields = ['name', 'id']
 
 
 class IndustrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Industry
-        fields = ['name']
+        fields = ['name', 'id']
 
 
 class TechStackSerializer(serializers.ModelSerializer):
     class Meta:
         model = TechStack
-        fields = ['name']
+        fields = ['name', 'id']
 
 
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
-        fields = ['name']
+        fields = ['name', 'id']
 
 
 class HostingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hosting
-        fields = ['name']
+        fields = ['name', 'id']
 
 
 class MvpSerializer(serializers.ModelSerializer):
