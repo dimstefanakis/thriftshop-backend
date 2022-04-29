@@ -19,16 +19,17 @@ class MVPViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
 
     def retrieve(self, request, pk=None):
-        queryset = Mvp.objects.filter(user=request.user)
-        mvp = get_object_or_404(queryset, pk=pk)
-        serializer = serializers.MvpSerializer(mvp)
+        # queryset = Mvp.objects.filter(user=request.user)
+        # mvp = get_object_or_404(queryset, pk=pk)
+        mvp = get_object_or_404(Mvp.objects.all(), pk=pk)
+        serializer = serializers.MvpSerializer(
+            mvp, context={'request': request})
         return Response(serializer.data)
 
     def list(self, request):
         queryset = Mvp.objects.all()
-        serializer = serializers.MvpSerializer(queryset, many=True)
+        serializer = serializers.MvpSerializer(queryset, context={'request': request}, many=True)
         return Response(serializer.data)
-
 
 @api_view(['POST'])
 def create_checkout_session(request):

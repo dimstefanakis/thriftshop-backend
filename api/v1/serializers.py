@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from mvp.models import Mvp, CloudType, Platform, Industry, TechStack, Service, Hosting
+from mvp.models import Mvp, CloudType, Platform, Industry, TechStack, Service, Hosting, FailureReason
 from accounts.models import UserProfile
 
 
@@ -8,6 +8,11 @@ class CloudTypeSerializer(serializers.ModelSerializer):
         model = CloudType
         fields = ['name', 'id']
 
+
+class FailureReasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FailureReason
+        fields = ['name', 'id']
 
 class PlatformSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,18 +45,28 @@ class HostingSerializer(serializers.ModelSerializer):
 
 
 class MvpSerializer(serializers.ModelSerializer):
+    preview_image = serializers.SerializerMethodField()
     cloud_types = CloudTypeSerializer(many=True)
+    failure_reasons = FailureReasonSerializer(many=True)
     platforms = PlatformSerializer(many=True)
     industries = IndustrySerializer(many=True)
     tech_stack = TechStackSerializer(many=True)
     services = ServiceSerializer(many=True)
     hosting = HostingSerializer(many=True)
 
+    def get_preview_image(self, mvp):
+        request = self.context.get('request')
+        if request and mvp.preview_image:
+            photo_url = mvp.preview_image.url
+            return request.build_absolute_uri(photo_url)
+        else:
+            return None
+
     class Meta:
         model = Mvp
-        fields = ('id', 'name', 'one_liner', 'description', 'validation', 'total_users', 'active_users',
-                'github_project_url', 'website_url', 'credit', 'cloud_types', 'platforms', 'industries', 'tech_stack',
-                'services', 'hosting', 'created_at', 'updated_at')
+        fields = ('id', 'name', 'one_liner', 'preview_image', 'description', 'validation', 'total_users', 'active_users',
+                  'github_project_url', 'website_url', 'credit', 'cloud_types', 'platforms', 'industries', 'tech_stack',
+                  'services', 'hosting', 'failure_reasons', 'created_at', 'updated_at')
         read_only_fields = ('created_at', 'updated_at', 'id')
 
 
