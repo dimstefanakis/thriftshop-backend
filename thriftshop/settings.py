@@ -32,7 +32,11 @@ DEBUG = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    'api.thriftmvp.com',
+    'staging.thriftmvp.com',
+]
 
 DEBUG = 'RENDER' not in os.environ
 
