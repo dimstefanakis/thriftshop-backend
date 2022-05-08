@@ -22,6 +22,11 @@ def money_to_integer(money):
 
 
 class Mvp(models.Model):
+    class Status(models.TextChoices):
+        IN_REVIEW = 'review', _('In Review')
+        REJECTED = 'rejected', _('Rejected')
+        ACCEPTED = 'accepted', _('Accepted')
+
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, related_name='mvps')
     name = models.CharField(max_length=100)
@@ -45,6 +50,11 @@ class Mvp(models.Model):
                         default_currency='EUR', default=0)
     stripe_product_id = models.CharField(max_length=100, blank=True, null=True)
     stripe_price_id = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.IN_REVIEW,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -72,7 +82,7 @@ class CloudType(models.Model):
     #     default=Type.SAAS,
     # )
     name = models.CharField(max_length=100)
-    mvps = models.ManyToManyField(Mvp,
+    mvps = models.ManyToManyField(Mvp, null=True, blank=True,
                                   related_name='cloud_types')
 
     def __str__(self):
@@ -93,7 +103,7 @@ class Platform(models.Model):
     # )
     name = models.CharField(max_length=100)
     mvps = models.ManyToManyField(
-        Mvp, related_name='platforms')
+        Mvp, null=True, blank=True, related_name='platforms')
 
     def __str__(self):
         return f"{self.name}"
@@ -101,7 +111,7 @@ class Platform(models.Model):
 
 class FailureReason(models.Model):
     name = models.CharField(max_length=100)
-    mvps = models.ManyToManyField(Mvp,
+    mvps = models.ManyToManyField(Mvp, null=True, blank=True,
                                   related_name='failure_reasons')
 
     def __str__(self):
@@ -110,7 +120,7 @@ class FailureReason(models.Model):
 
 class Industry(models.Model):
     name = models.CharField(max_length=100)
-    mvps = models.ManyToManyField(Mvp,
+    mvps = models.ManyToManyField(Mvp, null=True, blank=True,
                                   related_name='industries')
 
     def __str__(self):
@@ -119,7 +129,7 @@ class Industry(models.Model):
 
 class TechStack(models.Model):
     name = models.CharField(max_length=100)
-    mvps = models.ManyToManyField(Mvp,
+    mvps = models.ManyToManyField(Mvp, null=True, blank=True,
                                   related_name='tech_stack')
 
     def __str__(self):
@@ -129,7 +139,7 @@ class TechStack(models.Model):
 class Service(models.Model):
     name = models.CharField(max_length=100)
     mvps = models.ManyToManyField(
-        Mvp, related_name='services')
+        Mvp, null=True, blank=True, related_name='services')
 
     def __str__(self):
         return f"{self.name}"
@@ -138,30 +148,30 @@ class Service(models.Model):
 class Hosting(models.Model):
     name = models.CharField(max_length=100)
     mvps = models.ManyToManyField(
-        Mvp, related_name='hosting')
+        Mvp, null=True, blank=True, related_name='hosting')
 
     def __str__(self):
         return f"{self.name}"
 
 
-@receiver(post_save, sender=Mvp)
-def create_mvp_stripe_product(sender, instance, created, **kwargs):
-    if created:
-        product = stripe.Product.create(
-            name=instance.name,
-            description=instance.one_liner,
-            url=instance.github_project_url,
-            metadata={
-                'id': instance.pk,
-            }
-        )
+# @receiver(post_save, sender=Mvp)
+# def create_mvp_stripe_product(sender, instance, created, **kwargs):
+#     if created:
+#         product = stripe.Product.create(
+#             name=instance.name,
+#             description=instance.one_liner,
+#             url=instance.github_project_url,
+#             metadata={
+#                 'id': instance.pk,
+#             }
+#         )
 
-        price = stripe.Price.create(
-            unit_amount=money_to_integer(instance.credit),
-            currency="eur",
-            product=product['id'],
-        )
+#         price = stripe.Price.create(
+#             unit_amount=money_to_integer(instance.credit),
+#             currency="eur",
+#             product=product['id'],
+#         )
 
-        instance.stripe_price_id = price['id']
-        instance.stripe_product_id = product['id']
-        instance.save()
+#         instance.stripe_price_id = price['id']
+#         instance.stripe_product_id = product['id']
+#         instance.save()

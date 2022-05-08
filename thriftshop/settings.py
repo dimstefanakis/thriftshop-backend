@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'djmoney',
     'mvp',
+    'membership',
     'accounts',
     'api'
 ]

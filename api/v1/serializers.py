@@ -14,6 +14,7 @@ class FailureReasonSerializer(serializers.ModelSerializer):
         model = FailureReason
         fields = ['name', 'id']
 
+
 class PlatformSerializer(serializers.ModelSerializer):
     class Meta:
         model = Platform
@@ -45,6 +46,7 @@ class HostingSerializer(serializers.ModelSerializer):
 
 
 class MvpSerializer(serializers.ModelSerializer):
+    user_profile = serializers.SerializerMethodField()
     preview_image = serializers.SerializerMethodField()
     cloud_types = CloudTypeSerializer(many=True)
     failure_reasons = FailureReasonSerializer(many=True)
@@ -53,6 +55,9 @@ class MvpSerializer(serializers.ModelSerializer):
     tech_stack = TechStackSerializer(many=True)
     services = ServiceSerializer(many=True)
     hosting = HostingSerializer(many=True)
+
+    def get_user_profile(self, mvp):
+        return UserProfileSerializer(mvp.user.profile).data
 
     def get_preview_image(self, mvp):
         request = self.context.get('request')
@@ -64,7 +69,7 @@ class MvpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Mvp
-        fields = ('id', 'name', 'one_liner', 'preview_image', 'description', 'validation', 'total_users', 'active_users',
+        fields = ('id', 'user_profile', 'name', 'one_liner', 'preview_image', 'description', 'validation', 'total_users', 'active_users',
                   'github_project_url', 'website_url', 'credit', 'cloud_types', 'platforms', 'industries', 'tech_stack',
                   'services', 'hosting', 'failure_reasons', 'created_at', 'updated_at')
         read_only_fields = ('created_at', 'updated_at', 'id')
