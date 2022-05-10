@@ -66,10 +66,26 @@ class MembershipPlan(models.Model):
 
 
 class Subscription(models.Model):
+    class Status(models.TextChoices):
+        TRIALING = 'trialing', _('Trialing')
+        ACTIVE = 'active', _('Active')
+        CANCELLED = 'canceled', _('Canceled')
+        PAST_DUE = 'past_due', _('Past Due')
+        UNPAID = 'unpaid', _('Unpaid')
+        INCOMPLETE = 'incomplete', _('Incomplete')
+        INCOMPLETE_EXPIRED = 'incomplete_expired', _('Incomplete Expired')
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.INCOMPLETE,
+    )
+
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="subscriptions")
     membership_plan = models.ForeignKey(
         MembershipPlan, on_delete=models.CASCADE, related_name="subscriptions")
     stripe_subscription_id = models.CharField(max_length=100, blank=True, null=True)
+    
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

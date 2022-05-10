@@ -1,3 +1,4 @@
+from ast import Sub
 import os
 import stripe
 import requests
@@ -7,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import viewsets, mixins
 from requests_oauthlib import OAuth1Session
+from accounts.models import UserProfile
 from mvp.models import FailureReason, Industry, TechStack, Service, Hosting, Platform, CloudType, Mvp
 from membership.models import Subscription, Membership, MembershipPlan
 from . import serializers
@@ -295,7 +297,26 @@ def stripe_webhook(request):
         # The status of the invoice will show up as paid. Store the status in your
         # database to reference when a user accesses your service to avoid hitting rate
         # limits.
-        print(data)
+        subscription_id = data_object['subscription']
+        billing_reason = data_object['billing_reason']
+        plan = data_object['lines']['data'][0]['plan']
+        customer = UserProfile.objects.filter(
+            stripe_customer_id=data_object['customer']).first()
+        membership_plan = MembershipPlan.objects.filter(
+            stripe_price_id=plan['id']).first()
+        if billing_reason == 'subscription_create':
+            subscription = Subscription.objects.create(
+                user=customer, membership_plan=membership_plan, stripe_subscription_id=subscription_id)
+        if data['paid'] == True:
+            subscription = Subscription.objects.filter(
+                user=customer, stripe_subscription_id=subscription_id).first()
+            subscription.status = Subscription.ACTIVE
+            subscription.save()
+        if data['paid'] == False:
+            subscription = Subscription.objects.filter(
+                user=customer, stripe_subscription_id=subscription_id).first()
+            subscription.status = Subscription.UPDAID
+            subscription.save()
 
     if event_type == 'invoice.payment_failed':
         # If the payment fails or the customer does not have a valid payment method,
@@ -307,7 +328,17 @@ def stripe_webhook(request):
     if event_type == 'customer.subscription.deleted':
         # handle subscription canceled automatically based
         # upon your subscription settings. Or if the user cancels it.
-        print(data)
+        subscription_id = data_object['id']
+        plan = data_object['plan']['id']
+        customer = UserProfile.objects.filter(
+            stripe_customer_id=data_object['customer']).first()
+        membership_plan = MembershipPlan.objects.filter(
+            stripe_price_id=plan['id']).first()
+
+        subscription = Subscription.objects.filter(
+            user=customer, stripe_subscription_id=subscription_id).first()
+        subscription.status = Subscription.CANCELLED
+        subscription.save()
 
     if event_type == 'customer.subscription.created':
         pass
