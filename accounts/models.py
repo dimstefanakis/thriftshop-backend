@@ -19,6 +19,9 @@ class UserProfile(models.Model):
     stripe_customer_id = models.CharField(
         max_length=100, blank=True, null=True)
 
+    def __str__(self):
+        return self.user.email
+
 
 @receiver(pre_save, sender=UserProfile)
 def create_customer(sender, instance, **kwargs):

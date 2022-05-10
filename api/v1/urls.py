@@ -22,5 +22,7 @@ urlpatterns = [
     # used after registration flow
     path('v1/get_twitter_access_tokens/',
          views.get_twitter_access_tokens, name="get_twitter_access_tokens"),
+    path('v1/stripe_webhook/', views.stripe_webhook, name="stripe_webhook"),
+
 ]
 

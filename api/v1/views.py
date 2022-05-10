@@ -3,6 +3,7 @@ import os
 import stripe
 import requests
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -106,7 +107,7 @@ def create_subscription(request):
         # Create the subscription. Note we're expanding the Subscription's
         # latest invoice and that invoice's payment_intent
         # so we can pass it to the front end to confirm the payment
-        subscription = stripe.Subscription.create(
+        stripe_subscription = stripe.Subscription.create(
             customer=request.user.profile.stripe_customer_id,
             items=[{
                 'price': price_id,
@@ -114,17 +115,27 @@ def create_subscription(request):
             payment_behavior='default_incomplete',
             expand=['latest_invoice.payment_intent'],
         )
-        Subscription.objects.create(
-            user=request.user.profile,
-            membership_plan=membership_plan,
-            stripe_subscription_id=subscription['id'],
-        )
+
+        # Don't create a new subscription if one already exists
+        # subscription = Subscription.objects.filter(
+        #     user=request.user.profile)
+        # if subscription.exists():
+        #     subscription = subscription.first()
+        #     subscription.stripe_subscription_id = stripe_subscription.id
+        #     subscription.membership_plan = membership_plan
+        #     subscription.save()
+        # else:
+        #     Subscription.objects.create(
+        #         user=request.user.profile,
+        #         membership_plan=membership_plan,
+        #         stripe_subscription_id=stripe_subscription['id'],
+        #     )
         return Response({
-            'subscriptionId': subscription.id,
-            'clientSecret': subscription.latest_invoice.payment_intent.client_secret,
+            'subscriptionId': stripe_subscription.id,
+            'clientSecret': stripe_subscription.latest_invoice.payment_intent.client_secret,
         })
     except Exception as e:
-        return Response({'message': e.user_message}, status=400)
+        return Response({'error': 'An unexpected error occured'}, status=400)
 
 
 @api_view(['POST'])
@@ -271,10 +282,12 @@ def get_twitter_access_tokens(request):
     return Response({'oauth_token': access_token, 'oauth_token_secret': access_token_secret})
 
 
+@csrf_exempt
+@api_view(['POST'])
 def stripe_webhook(request):
     event = None
-    payload = request.data
-    sig_header = request.headers['STRIPE_SIGNATURE']
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
 
     try:
         event = stripe.Webhook.construct_event(
@@ -307,15 +320,15 @@ def stripe_webhook(request):
         if billing_reason == 'subscription_create':
             subscription = Subscription.objects.create(
                 user=customer, membership_plan=membership_plan, stripe_subscription_id=subscription_id)
-        if data['paid'] == True:
+        if data_object['paid'] == True:
             subscription = Subscription.objects.filter(
                 user=customer, stripe_subscription_id=subscription_id).first()
-            subscription.status = Subscription.ACTIVE
+            subscription.status = Subscription.Status.ACTIVE
             subscription.save()
-        if data['paid'] == False:
+        if data_object['paid'] == False:
             subscription = Subscription.objects.filter(
                 user=customer, stripe_subscription_id=subscription_id).first()
-            subscription.status = Subscription.UPDAID
+            subscription.status = Subscription.Status.UPDAID
             subscription.save()
 
     if event_type == 'invoice.payment_failed':
@@ -333,11 +346,11 @@ def stripe_webhook(request):
         customer = UserProfile.objects.filter(
             stripe_customer_id=data_object['customer']).first()
         membership_plan = MembershipPlan.objects.filter(
-            stripe_price_id=plan['id']).first()
+            stripe_price_id=plan).first()
 
         subscription = Subscription.objects.filter(
             user=customer, stripe_subscription_id=subscription_id).first()
-        subscription.status = Subscription.CANCELLED
+        subscription.status = Subscription.Status.CANCELLED
         subscription.save()
 
     if event_type == 'customer.subscription.created':
@@ -356,3 +369,5 @@ def stripe_webhook(request):
                 subscription_id,
                 default_payment_method=payment_intent.payment_method
             )
+
+    return Response(status=200)
