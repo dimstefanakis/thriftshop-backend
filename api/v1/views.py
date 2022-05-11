@@ -4,9 +4,12 @@ import stripe
 import requests
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from django.forms.fields import MultipleChoiceField
+from django_filters import rest_framework as filters
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 from rest_framework import viewsets, mixins
 from requests_oauthlib import OAuth1Session
 from accounts.models import UserProfile
@@ -17,10 +20,49 @@ from . import serializers
 stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 1
+    page_size_query_param = 'page_size'
+    max_page_size = 30
+
+class MultiValueCharFilter(filters.BaseCSVFilter, filters.CharFilter):
+    def filter(self, qs, value):
+        # value is either a list or an 'empty' value
+        values = value or []
+        for value in values:
+            qs = super(MultiValueCharFilter, self).filter(qs, value)
+        return qs
+
+
+class MvpFilter(filters.FilterSet):
+    cloud_types = MultiValueCharFilter(
+        field_name="cloud_types__name", lookup_expr='contains')
+    tech_stack = MultiValueCharFilter(
+        field_name="tech_stack__name", lookup_expr='contains')
+    services = MultiValueCharFilter(
+        field_name="services__name", lookup_expr='contains')
+    hosting = MultiValueCharFilter(
+        field_name="hosting__name", lookup_expr='contains')
+    platforms = MultiValueCharFilter(
+        field_name="platforms__name", lookup_expr='contains')
+    industries = MultiValueCharFilter(
+        field_name="industries__name", lookup_expr='contains')
+    failure_reasons = MultiValueCharFilter(
+        field_name="failure_reasons__name", lookup_expr='contains')
+
+    class Meta:
+        model = Mvp
+        fields = ['cloud_types', 'tech_stack', 'services',
+                  'hosting', 'platforms', 'industries', 'failure_reasons']
+
+
 class MVPViewSet(viewsets.ModelViewSet):
     queryset = Mvp.objects.all()
     serializer_class = serializers.MvpSerializer
     permission_classes = (AllowAny,)
+    filter_class = MvpFilter
+    filter_backends = (filters.DjangoFilterBackend,)
+    pagination_class = StandardResultsSetPagination
 
     def retrieve(self, request, pk=None):
         # queryset = Mvp.objects.filter(user=request.user)
@@ -30,11 +72,11 @@ class MVPViewSet(viewsets.ModelViewSet):
             mvp, context={'request': request})
         return Response(serializer.data)
 
-    def list(self, request):
-        queryset = Mvp.objects.all()
-        serializer = serializers.MvpSerializer(
-            queryset, context={'request': request}, many=True)
-        return Response(serializer.data)
+    # def list(self, request):
+    #     queryset = Mvp.objects.all()
+    #     serializer = serializers.MvpSerializer(
+    #         queryset, context={'request': request}, many=True)
+    #     return Response(serializer.data)
 
 
 class FailureReasonsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):

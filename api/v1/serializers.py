@@ -1,6 +1,19 @@
 from rest_framework import serializers
 from mvp.models import Mvp, CloudType, Platform, Industry, TechStack, Service, Hosting, FailureReason
+from membership.models import Membership, MembershipPlan, Subscription
 from accounts.models import UserProfile
+
+
+class MembershipPlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MembershipPlan
+        fields = ['id', 'name', 'description', 'credit', 'interval']
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = ['id', 'membership_plan', 'status']
 
 
 class CloudTypeSerializer(serializers.ModelSerializer):
@@ -76,6 +89,7 @@ class MvpSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    subscription = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
 
@@ -86,8 +100,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def get_name(self, profile):
         return profile.user.first_name + ' ' + profile.user.last_name
 
+    def get_subscription(self, profile):
+        return SubscriptionSerializer(profile.subscriptions.last()).data
+
     class Meta:
         model = UserProfile
         fields = ('id', 'user', 'name', 'twitter_avatar', 'avatar', 'website_url', 'github_url',
-                  'description')
+                  'description', 'subscription')
         read_only_fields = ('id',)
