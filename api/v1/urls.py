@@ -12,6 +12,7 @@ router.register(r'services', views.ServicesViewSet)
 router.register(r'hostings', views.HostingsViewSet)
 router.register(r'platforms', views.PlatformsViewSet)
 router.register(r'cloud_types', views.CloudTypesViewSet)
+router.register(r'membership_plans', views.MembershipPlansViewSet)
 
 urlpatterns = [
     path('v1/', include(router.urls)),
@@ -23,6 +24,5 @@ urlpatterns = [
     path('v1/get_twitter_access_tokens/',
          views.get_twitter_access_tokens, name="get_twitter_access_tokens"),
     path('v1/stripe_webhook/', views.stripe_webhook, name="stripe_webhook"),
-
 ]
 

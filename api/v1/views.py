@@ -80,46 +80,59 @@ class MVPViewSet(viewsets.ModelViewSet):
 
 
 class FailureReasonsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = FailureReason.objects.filter(mvps__status=Mvp.Status.ACCEPTED)
+    queryset = FailureReason.objects.filter(
+        mvps__status=Mvp.Status.ACCEPTED).distinct('name')
     serializer_class = serializers.FailureReasonSerializer
     permission_classes = (AllowAny,)
 
 
 class IndustriesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = Industry.objects.filter(mvps__status=Mvp.Status.ACCEPTED)
+    queryset = Industry.objects.filter(
+        mvps__status=Mvp.Status.ACCEPTED).distinct('name')
     serializer_class = serializers.IndustrySerializer
     permission_classes = (AllowAny,)
 
 
 class TechStacksViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = TechStack.objects.filter(mvps__status=Mvp.Status.ACCEPTED)
+    queryset = TechStack.objects.filter(
+        mvps__status=Mvp.Status.ACCEPTED).distinct('name')
     serializer_class = serializers.TechStackSerializer
     permission_classes = (AllowAny,)
 
 
 class ServicesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = Service.objects.filter(mvps__status=Mvp.Status.ACCEPTED)
+    queryset = Service.objects.filter(
+        mvps__status=Mvp.Status.ACCEPTED).distinct('name')
     serializer_class = serializers.ServiceSerializer
     permission_classes = (AllowAny,)
 
 
 class HostingsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = Hosting.objects.filter(mvps__status=Mvp.Status.ACCEPTED)
+    queryset = Hosting.objects.filter(
+        mvps__status=Mvp.Status.ACCEPTED).distinct('name')
     serializer_class = serializers.HostingSerializer
     permission_classes = (AllowAny,)
 
 
 class CloudTypesViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = CloudType.objects.filter(mvps__status=Mvp.Status.ACCEPTED)
+    queryset = CloudType.objects.filter(
+        mvps__status=Mvp.Status.ACCEPTED).distinct('name')
     serializer_class = serializers.CloudTypeSerializer
     permission_classes = (AllowAny,)
 
 
 class PlatformsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = Platform.objects.filter(mvps__status=Mvp.Status.ACCEPTED)
+    queryset = Platform.objects.filter(
+        mvps__status=Mvp.Status.ACCEPTED).distinct('name')
     serializer_class = serializers.PlatformSerializer
     permission_classes = (AllowAny,)
 
+
+class MembershipPlansViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    queryset = MembershipPlan.objects.all()
+    serializer_class = serializers.MembershipPlanSerializer
+    permission_classes = (AllowAny,)
+  
 
 @api_view(['POST'])
 def create_checkout_session(request):
