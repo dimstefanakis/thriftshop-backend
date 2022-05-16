@@ -1,4 +1,3 @@
-from ast import Sub
 import os
 import stripe
 import requests
@@ -13,7 +12,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import viewsets, mixins
 from requests_oauthlib import OAuth1Session
 from accounts.models import UserProfile
-from mvp.models import FailureReason, Industry, TechStack, Service, Hosting, Platform, CloudType, Mvp
+from mvp.models import FailureReason, Industry, TechStack, Service, Hosting, Platform, CloudType, Mvp, MvpSuggestion
 from membership.models import Subscription, Membership, MembershipPlan
 from . import serializers
 
@@ -25,6 +24,7 @@ class StandardResultsSetPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 30
 
+
 class MultiValueCharFilter(filters.BaseCSVFilter, filters.CharFilter):
     def filter(self, qs, value):
         # value is either a list or an 'empty' value
@@ -35,6 +35,8 @@ class MultiValueCharFilter(filters.BaseCSVFilter, filters.CharFilter):
 
 
 class MvpFilter(filters.FilterSet):
+    failure_reasons = MultiValueCharFilter(
+        field_name="failure_reasons__name", lookup_expr='contains')
     cloud_types = MultiValueCharFilter(
         field_name="cloud_types__name", lookup_expr='contains')
     tech_stack = MultiValueCharFilter(
@@ -47,8 +49,6 @@ class MvpFilter(filters.FilterSet):
         field_name="platforms__name", lookup_expr='contains')
     industries = MultiValueCharFilter(
         field_name="industries__name", lookup_expr='contains')
-    failure_reasons = MultiValueCharFilter(
-        field_name="failure_reasons__name", lookup_expr='contains')
 
     class Meta:
         model = Mvp
@@ -132,7 +132,7 @@ class MembershipPlansViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = MembershipPlan.objects.all()
     serializer_class = serializers.MembershipPlanSerializer
     permission_classes = (AllowAny,)
-  
+
 
 @api_view(['POST'])
 def create_checkout_session(request):
@@ -194,6 +194,22 @@ def create_subscription(request):
 
 
 @api_view(['POST'])
+def cancel_subscription(request):
+    user_profile = request.user.profile
+    subscription = Subscription.objects.filter(
+        user=user_profile).last()
+    if subscription:
+        stripe.Subscription.delete(
+            subscription.stripe_subscription_id,
+        )
+        subscription.status = Subscription.Status.CANCELLED
+        subscription.save()
+        return Response({'status': "Subscription successfully cancelled"})
+    else:
+        return Response({'error': "Subscription doesn't exist"})
+
+
+@api_view(['POST'])
 def create_subscription_checkout_session(request):
     try:
         data = request.data
@@ -216,6 +232,16 @@ def create_subscription_checkout_session(request):
         return Response({'checkout_url': checkout_session.url}, status=200)
     except Exception as e:
         return Response({'error': 'An unexpected error occured'}, status=500)
+
+
+@api_view(['POST'])
+def create_mvp_suggestion(request):
+    data = request.data
+    mvp_suggestion = MvpSuggestion.objects.create(
+        user=request.user,
+        suggestion=data['suggestion'],
+    )
+    return Response({'status': 'Mvp suggestion created'})
 
 
 @api_view(['POST'])

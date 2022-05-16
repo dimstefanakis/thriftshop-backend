@@ -18,7 +18,11 @@ urlpatterns = [
     path('v1/', include(router.urls)),
     path('v1/user/me/', views.get_user, name="get_user"),
     path('v1/submit_mvp/', views.create_mvp_submission, name="submit_mvp"),
+    path('v1/create_mvp_suggestion/', views.create_mvp_suggestion,
+         name="create_mvp_suggestion"),
     path('v1/create_subscription/', views.create_subscription, name="submit_mvp"),
+    path('v1/cancel_subscription/', views.cancel_subscription,
+         name="cancel_subscription"),
     path('v1/get_twitter_tokens/', views.get_twitter_tokens, name="twitter_tokens"),
     # used after registration flow
     path('v1/get_twitter_access_tokens/',

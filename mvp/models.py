@@ -154,6 +154,16 @@ class Hosting(models.Model):
         return f"{self.name}"
 
 
+class MvpSuggestion(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='suggestions')
+    suggestion = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.suggestion}"
+
 # @receiver(post_save, sender=Mvp)
 # def create_mvp_stripe_product(sender, instance, created, **kwargs):
 #     if created:

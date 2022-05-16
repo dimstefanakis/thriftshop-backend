@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_save
@@ -12,7 +13,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(
         User, related_name='profile', on_delete=models.CASCADE)
     description = models.CharField(max_length=240, blank=True, default='')
-    avatar = models.ImageField(blank=True, upload_to='user/avatar')
+    avatar = models.ImageField(blank=True, upload_to='users/avatars', default="users/avatars/spaceguy.webp")
     twitter_avatar = models.URLField(max_length=400, blank=True, default='')
     website_url = models.URLField(max_length=200, blank=True, default='')
     github_url = models.URLField(max_length=200, blank=True, default='')

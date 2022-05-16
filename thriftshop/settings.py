@@ -97,10 +97,18 @@ CORS_ALLOWED_ORIGINS = [
 
 ROOT_URLCONF = 'thriftshop.urls'
 
+REST_AUTH_SERIALIZERS = {
+    'PASSWORD_RESET_SERIALIZER': 'accounts.serializers.CustomPasswordResetSerializer',
+    'PASSWORD_RESET_CONFIRM_SERIALIZER': 'accounts.serializers.PasswordResetConfirmSerializer',
+}
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'accounts', 'templates', 'accounts'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Mvp, CloudType, Platform, Industry, TechStack, Service, Hosting, FailureReason
+from .models import Mvp, CloudType, Platform, Industry, TechStack, Service, Hosting, FailureReason, MvpSuggestion
 
 
 class CloudTypeTabular(admin.TabularInline):
@@ -51,3 +51,4 @@ admin.site.register(TechStack)
 admin.site.register(Service)
 admin.site.register(Hosting)
 admin.site.register(FailureReason)
+admin.site.register(MvpSuggestion)
