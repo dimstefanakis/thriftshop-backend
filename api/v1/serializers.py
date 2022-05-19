@@ -84,7 +84,7 @@ class MvpSerializer(serializers.ModelSerializer):
         model = Mvp
         fields = ('id', 'user_profile', 'name', 'one_liner', 'preview_image', 'description', 'validation', 'total_users', 'active_users',
                   'github_project_url', 'website_url', 'credit', 'cloud_types', 'platforms', 'industries', 'tech_stack',
-                  'services', 'hosting', 'failure_reasons', 'created_at', 'updated_at')
+                  'services', 'hosting', 'failure_reasons', 'code_score', 'created_at', 'updated_at')
         read_only_fields = ('created_at', 'updated_at', 'id')
 
 
@@ -92,6 +92,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     subscription = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
 
     def get_avatar(self, profile):
         if profile.avatar:
@@ -103,8 +104,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def get_subscription(self, profile):
         return SubscriptionSerializer(profile.subscriptions.last()).data
 
+    def get_email(self, profile):
+        return profile.user.email
+
     class Meta:
         model = UserProfile
-        fields = ('id', 'user', 'name', 'twitter_avatar', 'avatar', 'website_url', 'github_url',
+        fields = ('id', 'user', 'email', 'name', 'twitter_avatar', 'avatar', 'website_url', 'github_url',
                   'description', 'subscription')
         read_only_fields = ('id',)
