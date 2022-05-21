@@ -17,6 +17,7 @@ router.register(r'membership_plans', views.MembershipPlansViewSet)
 urlpatterns = [
     path('v1/', include(router.urls)),
     path('v1/user/me/', views.get_user, name="get_user"),
+    path('v1/user/me/update/', views.update_user_profile, name="update_profile"),
     path('v1/submit_mvp/', views.create_mvp_submission, name="submit_mvp"),
     path('v1/create_mvp_suggestion/', views.create_mvp_suggestion,
          name="create_mvp_suggestion"),

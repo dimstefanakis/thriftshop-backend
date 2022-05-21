@@ -60,6 +60,8 @@ class Mvp(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.one_liner}"
+    class Meta:
+        ordering = ('-created_at',)
 
 
 class MvpImage(models.Model):

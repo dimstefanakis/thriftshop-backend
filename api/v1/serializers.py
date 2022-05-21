@@ -109,6 +109,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ('id', 'user', 'email', 'name', 'twitter_avatar', 'avatar', 'website_url', 'github_url',
+        fields = ('id', 'user', 'is_buyer', 'is_seller', 'email', 'name', 'twitter_avatar', 'avatar', 'website_url', 'github_url',
                   'description', 'subscription')
-        read_only_fields = ('id',)
+        read_only_fields = ('id', 'user', 'email', 'twitter_avatar', 'subscription')

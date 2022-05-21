@@ -20,9 +20,20 @@ stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 
 
 class StandardResultsSetPagination(PageNumberPagination):
-    page_size = 1
+    page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 30
+
+    def get_paginated_response(self, data):
+        return Response({
+            'links': {
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link()
+            },
+            'count': self.page.paginator.count,
+            'total_pages': self.page.paginator.num_pages,
+            'results': data
+        })
 
 
 class MultiValueCharFilter(filters.BaseCSVFilter, filters.CharFilter):
@@ -32,6 +43,10 @@ class MultiValueCharFilter(filters.BaseCSVFilter, filters.CharFilter):
         for value in values:
             qs = super(MultiValueCharFilter, self).filter(qs, value)
         return qs
+
+
+class UpdateUserProfileViewSet(viewsets.GenericViewSet, mixins.UpdateModelMixin):
+    pass
 
 
 class MvpFilter(filters.FilterSet):
@@ -132,6 +147,21 @@ class MembershipPlansViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = MembershipPlan.objects.all()
     serializer_class = serializers.MembershipPlanSerializer
     permission_classes = (AllowAny,)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_user_profile(request):
+    user = request.user
+    profile = user.profile
+    data = request.data
+
+    serializer = serializers.UserProfileSerializer(
+        profile, data=data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
 
 
 @api_view(['POST'])
