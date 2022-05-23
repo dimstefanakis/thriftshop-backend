@@ -72,7 +72,7 @@ class MvpFilter(filters.FilterSet):
 
 
 class MVPViewSet(viewsets.ModelViewSet):
-    queryset = Mvp.objects.all()
+    queryset = Mvp.objects.filter(status=Mvp.Status.ACCEPTED)
     serializer_class = serializers.MvpSerializer
     permission_classes = (AllowAny,)
     filter_class = MvpFilter
