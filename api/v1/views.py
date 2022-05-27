@@ -5,7 +5,8 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.fields import MultipleChoiceField
 from django_filters import rest_framework as filters
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
@@ -275,11 +276,13 @@ def create_mvp_suggestion(request):
 
 
 @api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
 def create_mvp_submission(request):
     name = request.data.get('name')
     one_liner = request.data.get('one_liner')
     description = request.data.get('description')
     validation = request.data.get('validation')
+    preview_image = request.FILES.get('preview_image')
 
     cloud_types = request.data.get('cloud_type')
     platforms = request.data.get('platforms')
@@ -318,6 +321,7 @@ def create_mvp_submission(request):
         one_liner=one_liner,
         description=description,
         validation=validation,
+        preview_image=preview_image
     )
 
     for cloud_type in cloud_types:

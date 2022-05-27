@@ -187,3 +187,18 @@ class MvpSuggestion(models.Model):
 #         instance.stripe_price_id = price['id']
 #         instance.stripe_product_id = product['id']
 #         instance.save()
+
+
+@receiver(post_save, sender=Mvp)
+def send_mvp_in_review_mail(sender, instance, created, **kwargs):
+    pass
+
+
+@receiver(post_save, sender=Mvp)
+def send_mvp_accepted_mail(sender, instance, created, **kwargs):
+    pass
+
+
+@receiver(post_save, sender=Mvp)
+def send_mvp_not_accepted_mail(sender, instance, created, **kwargs):
+    pass
