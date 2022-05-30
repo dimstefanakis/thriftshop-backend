@@ -282,6 +282,10 @@ def create_mvp_submission(request):
     one_liner = request.data.get('one_liner')
     description = request.data.get('description')
     validation = request.data.get('validation')
+    peak_user_count = request.data.get('peak_user_count')
+    current_user_count = request.data.get('current_user_count')
+    peak_mrr = request.data.get('peak_mrr')
+    current_mrr = request.data.get('current_mrr')
     preview_image = request.FILES.get('preview_image')
 
     cloud_types = request.data.get('cloud_type')
@@ -321,6 +325,10 @@ def create_mvp_submission(request):
         one_liner=one_liner,
         description=description,
         validation=validation,
+        peak_user_count=peak_user_count,
+        current_user_count=current_user_count,
+        peak_mrr=peak_mrr,
+        current_mrr=current_mrr,
         preview_image=preview_image
     )
 

@@ -208,12 +208,12 @@ class MvpSuggestion(models.Model):
 def send_mvp_in_review_mail(sender, instance, **kwargs):
     if instance.id is None:
         user = instance.user
-        subject = 'Your MVP has been accepted!'
+        subject = 'Your MVP is in review!'
 
         message = {
             "from_email": getattr(settings, 'DEFAULT_FROM_EMAIL'),
             "subject": subject,
-            "text": "Your MVP is in review!",
+            "text": "Your submission for {instance.name} is in review",
             # TODO change email
             "to": [
                 {
@@ -256,7 +256,7 @@ def send_mvp_accepted_mail(sender, instance, **kwargs):
         message = {
             "from_email": getattr(settings, 'DEFAULT_FROM_EMAIL'),
             "subject": subject,
-            "text": "Welcome to Mailchimp Transactional!",
+            "text": f"Your submission for {instance.name} has been accepted",
             # TODO change email
             "to": [
                 {
@@ -301,7 +301,7 @@ def send_mvp_not_accepted_mail(sender, instance, **kwargs):
         message = {
             "from_email": getattr(settings, 'DEFAULT_FROM_EMAIL'),
             "subject": subject,
-            "text": f"Your submission for {instance.name} did not qualify for out listing",
+            "text": f"Your submission for {instance.name} did not qualify for our listing",
             # TODO change email
             "to": [
                 {
