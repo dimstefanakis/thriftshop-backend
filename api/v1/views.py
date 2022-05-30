@@ -257,8 +257,8 @@ def create_subscription_checkout_session(request):
             ],
             mode='subscription',
             success_url=os.environ.get('FRONTEND_URL') +
-            '/success.html?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=os.environ.get('FRONTEND_URL') + '/cancel.html',
+            '/success?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=os.environ.get('FRONTEND_URL') + '/cancel',
         )
         return Response({'checkout_url': checkout_session.url}, status=200)
     except Exception as e:

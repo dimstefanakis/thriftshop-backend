@@ -43,8 +43,9 @@ class CustomPasswordResetSerializer(PasswordResetSerializer):
 
         message = {
             "from_email": getattr(settings, 'DEFAULT_FROM_EMAIL'),
-            "subject": "Hello world",
-            "text": "Welcome to Mailchimp Transactional!",
+            "subject": "Reset your ThriftMVP password",
+            "text": "A password reset has been requested for your account.",
+            # TODO change email
             "to": [
                 {
                     "email": 'beta@thriftmvp.com',
@@ -69,7 +70,7 @@ class CustomPasswordResetSerializer(PasswordResetSerializer):
             mailchimp = MailchimpTransactional.Client(
                 os.environ.get('MAILCHIMP_TRANSACTIONAL_API_KEY'))
             response = mailchimp.messages.send_template(
-                {"template_name": "mandrill-test", "template_content": [{}], "message": message})
+                {"template_name": "reset-password", "template_content": [{}], "message": message})
             print(response)
         except ApiClientError as error:
             print("An exception occurred: {}".format(error.text))

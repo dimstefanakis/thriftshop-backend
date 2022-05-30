@@ -2,11 +2,15 @@ import os
 import stripe
 from babel.numbers import get_currency_precision
 from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
+from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_save, pre_save
 from djmoney.models.fields import MoneyField
+import mailchimp_transactional as MailchimpTransactional
+from mailchimp_transactional.api_client import ApiClientError
 
 stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 
@@ -32,6 +36,7 @@ class Mvp(models.Model):
     name = models.CharField(max_length=100)
     one_liner = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
+
     # user describes their validation process
     validation = models.TextField(blank=True, null=True)
     preview_image = models.ImageField(
@@ -39,6 +44,15 @@ class Mvp(models.Model):
 
     total_users = models.IntegerField(default=0)
     active_users = models.IntegerField(default=0)
+
+    peak_user_count = models.IntegerField(default=0)
+    current_user_count = models.IntegerField(default=0)
+
+    # business stuff
+    peak_mrr = MoneyField(
+        max_digits=12, decimal_places=2, default_currency='USD', default=0)
+    current_mrr = MoneyField(
+        max_digits=12, decimal_places=2, default_currency='USD', default=0)
 
     # since projects usually consist of multiple repositories, we need to store the github project url
     # instead of the individual repository url
@@ -60,6 +74,7 @@ class Mvp(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.one_liner}"
+
     class Meta:
         ordering = ('-created_at',)
 
@@ -189,16 +204,126 @@ class MvpSuggestion(models.Model):
 #         instance.save()
 
 
-@receiver(post_save, sender=Mvp)
-def send_mvp_in_review_mail(sender, instance, created, **kwargs):
-    pass
+@receiver(pre_save, sender=Mvp)
+def send_mvp_in_review_mail(sender, instance, **kwargs):
+    if instance.id is None:
+        user = instance.user
+        subject = 'Your MVP has been accepted!'
+
+        message = {
+            "from_email": getattr(settings, 'DEFAULT_FROM_EMAIL'),
+            "subject": subject,
+            "text": "Your MVP is in review!",
+            # TODO change email
+            "to": [
+                {
+                    "email": 'beta@thriftmvp.com',
+                    "type": "to"
+                }
+            ],
+            "global_merge_vars": [{
+                "name": "mvp_name",
+                "content": instance.name
+            },
+                {
+                "name": "name",
+                "content": f"{user.first_name} {user.last_name}"
+            }]
+        }
+
+        try:
+            mailchimp = MailchimpTransactional.Client(
+                os.environ.get('MAILCHIMP_TRANSACTIONAL_API_KEY'))
+            response = mailchimp.messages.send_template(
+                {"template_name": "mvp-in-review", "template_content": [{}], "message": message})
+            print(response)
+        except ApiClientError as error:
+            print("An exception occurred: {}".format(error.text))
 
 
-@receiver(post_save, sender=Mvp)
-def send_mvp_accepted_mail(sender, instance, created, **kwargs):
-    pass
+@receiver(pre_save, sender=Mvp)
+def send_mvp_accepted_mail(sender, instance, **kwargs):
+    if instance.id is None:
+        return
+
+    previous = Mvp.objects.get(id=instance.id)
+    if previous.status != instance.status and instance.status == Mvp.Status.ACCEPTED:
+        user = instance.user
+        subject = 'Your MVP has been accepted!'
+
+        url = f"{os.environ.get('FRONTEND_URL')}/listing/{instance.pk}/"
+
+        message = {
+            "from_email": getattr(settings, 'DEFAULT_FROM_EMAIL'),
+            "subject": subject,
+            "text": "Welcome to Mailchimp Transactional!",
+            # TODO change email
+            "to": [
+                {
+                    "email": 'beta@thriftmvp.com',
+                    "type": "to"
+                }
+            ],
+            "global_merge_vars": [{
+                "name": "mvp_name",
+                "content": instance.name
+            },
+                {
+                "name": "mvp_url",
+                "content": url
+            },
+                {
+                "name": "name",
+                "content": f"{user.first_name} {user.last_name}"
+            }]
+        }
+
+        try:
+            mailchimp = MailchimpTransactional.Client(
+                os.environ.get('MAILCHIMP_TRANSACTIONAL_API_KEY'))
+            response = mailchimp.messages.send_template(
+                {"template_name": "mvp-approved", "template_content": [{}], "message": message})
+            print(response)
+        except ApiClientError as error:
+            print("An exception occurred: {}".format(error.text))
 
 
-@receiver(post_save, sender=Mvp)
-def send_mvp_not_accepted_mail(sender, instance, created, **kwargs):
-    pass
+@receiver(pre_save, sender=Mvp)
+def send_mvp_not_accepted_mail(sender, instance, **kwargs):
+    if instance.id is None:
+        return
+
+    previous = Mvp.objects.get(id=instance.id)
+    if previous.status != instance.status and instance.status == Mvp.Status.REJECTED:
+        user = instance.user
+        subject = 'Your MVP has been rejected'
+
+        message = {
+            "from_email": getattr(settings, 'DEFAULT_FROM_EMAIL'),
+            "subject": subject,
+            "text": f"Your submission for {instance.name} did not qualify for out listing",
+            # TODO change email
+            "to": [
+                {
+                    "email": 'beta@thriftmvp.com',
+                    "type": "to"
+                }
+            ],
+            "global_merge_vars": [{
+                "name": "mvp_name",
+                "content": instance.name
+            },
+                {
+                "name": "name",
+                "content": f"{user.first_name} {user.last_name}"
+            }]
+        }
+
+        try:
+            mailchimp = MailchimpTransactional.Client(
+                os.environ.get('MAILCHIMP_TRANSACTIONAL_API_KEY'))
+            response = mailchimp.messages.send_template(
+                {"template_name": "mvp-rejected", "template_content": [{}], "message": message})
+            print(response)
+        except ApiClientError as error:
+            print("An exception occurred: {}".format(error.text))
