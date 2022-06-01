@@ -286,6 +286,9 @@ def create_mvp_submission(request):
     current_user_count = request.data.get('current_user_count')
     peak_mrr = request.data.get('peak_mrr')
     current_mrr = request.data.get('current_mrr')
+    website_url = request.data.get('website_url')
+    github_project_url = request.data.get('github_url')
+    credit = request.data.get('asking_price')
     preview_image = request.FILES.get('preview_image')
 
     cloud_types = request.data.get('cloud_type')
@@ -329,6 +332,9 @@ def create_mvp_submission(request):
         current_user_count=current_user_count,
         peak_mrr=peak_mrr,
         current_mrr=current_mrr,
+        website_url=website_url,
+        github_project_url=github_project_url,
+        credit=credit,
         preview_image=preview_image
     )
 

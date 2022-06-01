@@ -6,7 +6,7 @@ from djmoney.models.fields import MoneyField
 from accounts.models import UserProfile
 from babel.numbers import get_currency_precision
 import stripe
-
+import uuid
 
 def money_to_integer(money):
     return int(
@@ -28,6 +28,8 @@ def create_stripe_price(instance, interval):
 
 
 class Membership(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
     class Tier(models.TextChoices):
         PREMIUM = 'premium', _('Premium')
 
@@ -43,6 +45,8 @@ class Membership(models.Model):
 
 
 class MembershipPlan(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
     class Interval(models.TextChoices):
         ONE_MONTH = 'one_month', _('One month')
         SIX_MONTHS = 'six_months', _('Six months')
@@ -66,6 +70,8 @@ class MembershipPlan(models.Model):
 
 
 class Subscription(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
     class Status(models.TextChoices):
         TRIALING = 'trialing', _('Trialing')
         ACTIVE = 'active', _('Active')

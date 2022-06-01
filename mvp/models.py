@@ -11,6 +11,7 @@ from django.db.models.signals import post_save, pre_save
 from djmoney.models.fields import MoneyField
 import mailchimp_transactional as MailchimpTransactional
 from mailchimp_transactional.api_client import ApiClientError
+import uuid
 
 stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 
@@ -26,6 +27,8 @@ def money_to_integer(money):
 
 
 class Mvp(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
     class Status(models.TextChoices):
         IN_REVIEW = 'review', _('In Review')
         REJECTED = 'rejected', _('Rejected')
@@ -80,6 +83,7 @@ class Mvp(models.Model):
 
 
 class MvpImage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     mvp = models.ForeignKey(
         Mvp, on_delete=models.CASCADE, related_name='images')
     preview_image = models.ImageField(
@@ -98,6 +102,7 @@ class CloudType(models.Model):
     #     choices=Type.choices,
     #     default=Type.SAAS,
     # )
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     mvps = models.ManyToManyField(Mvp, null=True, blank=True,
                                   related_name='cloud_types')
@@ -118,6 +123,7 @@ class Platform(models.Model):
     #     choices=Type.choices,
     #     default=Type.OTHER,
     # )
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     mvps = models.ManyToManyField(
         Mvp, null=True, blank=True, related_name='platforms')
@@ -127,6 +133,7 @@ class Platform(models.Model):
 
 
 class FailureReason(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     mvps = models.ManyToManyField(Mvp, null=True, blank=True,
                                   related_name='failure_reasons')
@@ -136,6 +143,7 @@ class FailureReason(models.Model):
 
 
 class Industry(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     mvps = models.ManyToManyField(Mvp, null=True, blank=True,
                                   related_name='industries')
@@ -145,6 +153,7 @@ class Industry(models.Model):
 
 
 class TechStack(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     mvps = models.ManyToManyField(Mvp, null=True, blank=True,
                                   related_name='tech_stack')
@@ -154,6 +163,7 @@ class TechStack(models.Model):
 
 
 class Service(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     mvps = models.ManyToManyField(
         Mvp, null=True, blank=True, related_name='services')
@@ -163,6 +173,7 @@ class Service(models.Model):
 
 
 class Hosting(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     mvps = models.ManyToManyField(
         Mvp, null=True, blank=True, related_name='hosting')
@@ -172,6 +183,7 @@ class Hosting(models.Model):
 
 
 class MvpSuggestion(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='suggestions')
     suggestion = models.TextField()

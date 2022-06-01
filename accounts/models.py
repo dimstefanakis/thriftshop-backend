@@ -10,9 +10,11 @@ from mailchimp_marketing import Client
 from mailchimp_marketing.api_client import ApiClientError
 import hashlib
 import stripe
+import uuid
 
 
 class UserProfile(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(
         User, related_name='profile', on_delete=models.CASCADE)
     is_buyer = models.BooleanField(default=False)
@@ -27,7 +29,7 @@ class UserProfile(models.Model):
         max_length=100, blank=True, null=True)
 
     def __str__(self):
-        return self.user.email
+        return f"{self.user.first_name} {self.user.last_name}" or self.user.email
 
 
 # Subscription Logic

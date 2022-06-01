@@ -96,6 +96,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def get_avatar(self, profile):
         if profile.avatar:
+            if 'spaceguy.webp' in profile.avatar.url and profile.twitter_avatar:
+                return profile.twitter_avatar
             return profile.avatar.url
 
     def get_name(self, profile):
