@@ -216,9 +216,9 @@ class MvpSuggestion(models.Model):
 #         instance.save()
 
 
-@receiver(pre_save, sender=Mvp)
-def send_mvp_in_review_mail(sender, instance, **kwargs):
-    if instance.id is None:
+@receiver(post_save, sender=Mvp)
+def send_mvp_in_review_mail(sender, instance, created, **kwargs):
+    if created:
         user = instance.user
         subject = 'Your MVP is in review!'
 
@@ -229,7 +229,7 @@ def send_mvp_in_review_mail(sender, instance, **kwargs):
             # TODO change email
             "to": [
                 {
-                    "email": 'beta@thriftmvp.com',
+                    "email": instance.user.email,
                     "type": "to"
                 }
             ],
@@ -255,7 +255,7 @@ def send_mvp_in_review_mail(sender, instance, **kwargs):
 
 @receiver(pre_save, sender=Mvp)
 def send_mvp_accepted_mail(sender, instance, **kwargs):
-    if instance.id is None:
+    if instance._state.adding:
         return
 
     previous = Mvp.objects.get(id=instance.id)
@@ -272,7 +272,7 @@ def send_mvp_accepted_mail(sender, instance, **kwargs):
             # TODO change email
             "to": [
                 {
-                    "email": 'beta@thriftmvp.com',
+                    "email": instance.user.email,
                     "type": "to"
                 }
             ],
@@ -302,7 +302,7 @@ def send_mvp_accepted_mail(sender, instance, **kwargs):
 
 @receiver(pre_save, sender=Mvp)
 def send_mvp_not_accepted_mail(sender, instance, **kwargs):
-    if instance.id is None:
+    if instance._state.adding:
         return
 
     previous = Mvp.objects.get(id=instance.id)
@@ -317,7 +317,7 @@ def send_mvp_not_accepted_mail(sender, instance, **kwargs):
             # TODO change email
             "to": [
                 {
-                    "email": 'beta@thriftmvp.com',
+                    "email": instance.user.email,
                     "type": "to"
                 }
             ],

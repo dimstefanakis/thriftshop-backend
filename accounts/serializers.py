@@ -48,7 +48,7 @@ class CustomPasswordResetSerializer(PasswordResetSerializer):
             # TODO change email
             "to": [
                 {
-                    "email": 'beta@thriftmvp.com',
+                    "email": user.email,
                     "type": "to"
                 }
             ],

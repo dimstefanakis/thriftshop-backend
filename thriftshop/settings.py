@@ -32,6 +32,9 @@ DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'beta@thriftmvp.com'
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_EMAIL_REQUIRED = False
+SOCIALACCOUNT_QUERY_EMAIL = True
 
 ALLOWED_HOSTS = [
     'localhost',
