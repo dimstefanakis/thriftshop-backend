@@ -342,14 +342,16 @@ def create_mvp_submission(request):
     )
 
     for cloud_type in cloud_types:
-        obj, created = CloudType.objects.get_or_create(
-            defaults={'name': cloud_type}, name__iexact=cloud_type)
-        mvp.cloud_types.add(obj)
+        if cloud_type:
+            obj, created = CloudType.objects.get_or_create(
+                defaults={'name': cloud_type}, name__iexact=cloud_type)
+            mvp.cloud_types.add(obj)
 
     for platform in platforms:
-        obj, created = Platform.objects.get_or_create(
-            defaults={'name': platform}, name__iexact=platform)
-        mvp.platforms.add(obj)
+        if platform:
+            obj, created = Platform.objects.get_or_create(
+                defaults={'name': platform}, name__iexact=platform)
+            mvp.platforms.add(obj)
 
     for hosting in hostings:
         obj, created = Hosting.objects.get_or_create(
@@ -357,24 +359,28 @@ def create_mvp_submission(request):
         mvp.hosting.add(obj)
 
     for service in services:
-        obj, created = Service.objects.get_or_create(
-            defaults={'name': service}, name__iexact=service)
-        mvp.services.add(obj)
+        if service:
+            obj, created = Service.objects.get_or_create(
+                defaults={'name': service}, name__iexact=service)
+            mvp.services.add(obj)
 
     for tech_stack_item in tech_stack:
-        obj, created = TechStack.objects.get_or_create(
-            defaults={'name': tech_stack_item}, name__iexact=tech_stack_item)
-        mvp.tech_stack.add(obj)
+        if tech_stack_item:
+            obj, created = TechStack.objects.get_or_create(
+                defaults={'name': tech_stack_item}, name__iexact=tech_stack_item)
+            mvp.tech_stack.add(obj)
 
     for industry in industries:
-        obj, created = Industry.objects.get_or_create(
-            defaults={'name': industry}, name__iexact=industry)
-        mvp.industries.add(obj)
+        if industry:
+            obj, created = Industry.objects.get_or_create(
+                defaults={'name': industry}, name__iexact=industry)
+            mvp.industries.add(obj)
 
     for failure_reason in failure_reasons:
-        obj, created = FailureReason.objects.get_or_create(
-            defaults={'name': failure_reason}, name__iexact=failure_reason)
-        mvp.failure_reasons.add(obj)
+        if failure_reason:
+            obj, created = FailureReason.objects.get_or_create(
+                defaults={'name': failure_reason}, name__iexact=failure_reason)
+            mvp.failure_reasons.add(obj)
 
     return Response({'success': 'MVP created successfully', 'mvp': serializers.MvpSerializer(mvp).data})
 
