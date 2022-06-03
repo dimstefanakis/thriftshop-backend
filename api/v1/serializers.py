@@ -104,7 +104,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return profile.user.first_name + ' ' + profile.user.last_name
 
     def get_subscription(self, profile):
-        return SubscriptionSerializer(profile.subscriptions.last()).data
+        if profile.subscriptions.exists():
+            return SubscriptionSerializer(profile.subscriptions.latest('created_at')).data
+        return None
 
     def get_email(self, profile):
         return profile.user.email

@@ -227,8 +227,11 @@ def create_subscription(request):
 @api_view(['POST'])
 def cancel_subscription(request):
     user_profile = request.user.profile
-    subscription = Subscription.objects.filter(
-        user=user_profile).last()
+    subscription = None
+    if Subscription.objects.filter(
+        user=user_profile).exists():
+        subscription = Subscription.objects.filter(
+            user=user_profile).latest('created_at')
     if subscription:
         stripe.Subscription.delete(
             subscription.stripe_subscription_id,
@@ -299,20 +302,20 @@ def create_mvp_submission(request):
     industries = request.data.get('industries')
     failure_reasons = request.data.get('failure_reasons')
 
-    if not platforms:
-        return Response({'error': 'Add at least one platform'})
-    if not hostings:
-        return Response({'error': 'Add at least one hosting'})
-    if not services:
-        return Response({'error': 'Add at least one service'})
-    if not tech_stack:
-        return Response({'error': 'Add at least one item in the tech stack'})
-    if not industries:
-        return Response({'error': 'Add at least one industry'})
-    if not failure_reasons:
-        return Response({'error': 'Add at least one failure reason'})
-    if not cloud_types:
-        return Response({'error': 'Add at least one cloud type'})
+    # if not platforms:
+    #     return Response({'error': 'Add at least one platform'})
+    # if not hostings:
+    #     return Response({'error': 'Add at least one hosting'})
+    # if not services:
+    #     return Response({'error': 'Add at least one service'})
+    # if not tech_stack:
+    #     return Response({'error': 'Add at least one item in the tech stack'})
+    # if not industries:
+    #     return Response({'error': 'Add at least one industry'})
+    # if not failure_reasons:
+    #     return Response({'error': 'Add at least one failure reason'})
+    # if not cloud_types:
+    #     return Response({'error': 'Add at least one cloud type'})
 
     platforms = platforms.split(',')
     hostings = hostings.split(',')
@@ -449,14 +452,14 @@ def stripe_webhook(request):
         if billing_reason == 'subscription_create':
             subscription = Subscription.objects.create(
                 user=customer, membership_plan=membership_plan, stripe_subscription_id=subscription_id)
-        if data_object['paid'] == True:
+        if data_object['paid'] == True:            
             subscription = Subscription.objects.filter(
-                user=customer, stripe_subscription_id=subscription_id).first()
+                user=customer, stripe_subscription_id=subscription_id).latest('created_at')
             subscription.status = Subscription.Status.ACTIVE
             subscription.save()
         if data_object['paid'] == False:
             subscription = Subscription.objects.filter(
-                user=customer, stripe_subscription_id=subscription_id).first()
+                user=customer, stripe_subscription_id=subscription_id).latest('created_at')
             subscription.status = Subscription.Status.UPDAID
             subscription.save()
 

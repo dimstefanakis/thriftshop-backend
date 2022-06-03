@@ -4,37 +4,37 @@ from .models import Mvp, CloudType, Platform, Industry, TechStack, Service, Host
 
 class CloudTypeTabular(admin.TabularInline):
     model = CloudType.mvps.through
-    extra = 1
+    extra = 0
 
 
 class PlatformTabular(admin.TabularInline):
     model = Platform.mvps.through
-    extra = 1
+    extra = 0
 
 
 class IndustryTabular(admin.TabularInline):
     model = Industry.mvps.through
-    extra = 1
+    extra = 0
 
 
 class TechStackTabular(admin.TabularInline):
     model = TechStack.mvps.through
-    extra = 1
+    extra = 0
 
 
 class ServiceTabular(admin.TabularInline):
     model = Service.mvps.through
-    extra = 1
+    extra = 0
 
 
 class HostingTabular(admin.TabularInline):
     model = Hosting.mvps.through
-    extra = 1
+    extra = 0
 
 
 class FailureReasonTabular(admin.TabularInline):
     model = FailureReason.mvps.through
-    extra = 1
+    extra = 0
 
 
 class MVPAdmin(admin.ModelAdmin):
