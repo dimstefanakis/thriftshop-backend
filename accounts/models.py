@@ -23,8 +23,8 @@ class UserProfile(models.Model):
     avatar = models.ImageField(
         blank=True, upload_to='users/avatars', default="users/avatars/spaceguy.webp")
     twitter_avatar = models.URLField(max_length=400, blank=True, default='')
-    website_url = models.URLField(max_length=200, blank=True, default='')
-    github_url = models.URLField(max_length=200, blank=True, default='')
+    website_url = models.URLField(max_length=200, blank=True, null=True, default='')
+    github_url = models.URLField(max_length=200, blank=True, null=True, default='')
     stripe_customer_id = models.CharField(
         max_length=100, blank=True, null=True)
 

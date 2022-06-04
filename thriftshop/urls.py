@@ -36,5 +36,6 @@ urlpatterns = [
             name='password_reset_confirm'),
     path('api/auth/twitter/', views.TwitterLogin.as_view(), name='twitter_login'),
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
+    path('accounts/', include('allauth.urls'), name='socialaccount_signup'),
     path('', include('api.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
